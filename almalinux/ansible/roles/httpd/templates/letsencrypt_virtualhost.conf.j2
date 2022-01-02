@@ -1,0 +1,19 @@
+<VirtualHost *:443>
+  ServerName {{ item.value.httpd.hostname }}
+  DocumentRoot {{ item.value.httpd.host_dir }}{{ item.value.httpd.public_dir }}
+  SSLEngine on
+  SSLCipherSuite AES256+EECDH:AES256+EDH
+  SSLProtocol All -SSLv2 -SSLv3
+  SSLHonorCipherOrder On
+  SSLCertificateFile /etc/letsencrypt/live/{{ item.value.httpd.hostname }}/cert.pem
+  SSLCertificateKeyFile /etc/letsencrypt/live/{{ item.value.httpd.hostname }}/privkey.pem
+  SSLCertificateChainFile /etc/letsencrypt/live/{{ item.value.httpd.hostname }}/chain.pem
+  <Directory "{{ item.value.httpd.host_dir }}{{ item.value.httpd.public_dir }}">
+  {% for n in item.value.httpd.conf_ssl_options %}
+    {{ n }}
+  {% endfor %}
+  </Directory>
+  ErrorLog {{ item.value.httpd.log }}/error.log
+  CustomLog {{ item.value.httpd.log }}/access.log combined
+</VirtualHost>
+

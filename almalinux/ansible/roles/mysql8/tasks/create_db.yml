@@ -1,0 +1,17 @@
+---
+# tasks file for roles/mysql57
+# create db
+
+- name: create mysql database
+  become: true
+  mysql_db:
+    login_user: root
+    login_password: "{{ mysql_password }}"
+    name: "{{ item.db_name }}"
+    state: "{{ item.state }}"
+  with_items:
+    - "{{ mysql8.databases }}"
+  tags:
+    - mysql_create_db
+
+

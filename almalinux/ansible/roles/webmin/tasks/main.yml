@@ -1,0 +1,16 @@
+---
+# tasks file for roles/webmin
+
+- name: Add webmin repository
+  become: true
+  template:
+    src: templates/webmin.repo.j2
+    dest: "/etc/yum.repos.d/webmin.repo"
+
+- name: install webmin
+  become: true
+  dnf:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - webmin

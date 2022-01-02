@@ -1,0 +1,65 @@
+---
+- name: ensure created selfca private key
+  become: true
+  openssl_privatekey:
+    path: "/etc/pki/tls/private/{{ httpd_domain }}.key"
+    state: present
+  notify:
+    - Restart httpd
+
+- name: ensure created csr
+  become: true
+  openssl_csr:
+    commonName: "{{ ca_CN }}"
+    countryName: "{{ ca_C }}"
+    emailAddress: "{{ ca_EMail }}"
+    localityName: "{{ ca_L }}"
+    organizationName: "{{ ca_O }}"
+    organizationalUnitName: "{{ ca_OU }}"
+    path: "/etc/pki/tls/private/{{ httpd_domain }}.csr"
+    privatekey_path: "/etc/pki/tls/private/{{ httpd_domain }}.key"
+    state: present
+    stateOrProvinceName: "{{ ca_ST }}"
+  notify:
+    - Restart httpd
+
+- name: ensure self sighed certificate
+  become: true
+  openssl_certificate:
+    csr_path: "/etc/pki/tls/private/{{ httpd_domain }}.csr"
+    path: "/etc/pki/tls/certs/{{ httpd_domain }}.crt"
+    privatekey_path: "/etc/pki/tls/private/{{ httpd_domain }}.key"
+    provider: selfsigned
+    state: present
+    valid_in: 315360000
+  notify:
+    - Restart httpd
+
+- name: Synchronization using rsync protocol (pull)
+  become: true
+  synchronize:
+    mode: pull
+    src: "/etc/pki/tls/certs/{{ httpd_domain }}.crt"
+    dest: "{{ playbook_dir }}/certs/{{ httpd_domain }}.crt"
+
+
+
+- name: httpd ssl | Set crt
+  become: true
+  lineinfile:
+    dest: /etc/httpd/conf.d/ssl.conf
+    regexp: "^SSLCertificateFile *"
+    insertafter: "#SSLCertificateFile *"
+    line:         "SSLCertificateFile /etc/pki/tls/certs/{{ httpd_domain }}.crt"
+  notify:
+    - Restart httpd
+
+- name: httpd ssl | Set key
+  become: true
+  lineinfile:
+    dest: /etc/httpd/conf.d/ssl.conf
+    regexp:      "^SSLCertificateKeyFile *"
+    insertafter: "#SSLCertificateKeyFile *"
+    line:         "SSLCertificateKeyFile /etc/pki/tls/private/{{ httpd_domain }}.key"
+  notify:
+    - Restart httpd

@@ -1,0 +1,7 @@
+---
+# handlers file for roles/php
+- name: httpd_restart
+  become: true
+  service:
+    name: httpd
+    state: restarted

@@ -1,0 +1,31 @@
+---
+# vars file for roles/mysql57
+#mysql_password: ''  #  first time
+default_mysql_password: ''
+mysql_password: 'password'
+
+mysql8:
+  databases:
+    - db_name: 'db1'
+      login_user: 'root'
+      login_password: '{{ mysql_password }}'
+      state: 'present'
+    - db_name: 'db2'
+      login_user: 'root'
+      login_password: '{{ mysql_password }}'
+      state: 'present'
+  user:
+    - username: 'db_usr1'
+      state: 'present'
+      login_user: 'root'
+      login_password: '{{ mysql_password }}'
+      host: 'localhost'
+      password: 'password'
+      db_name: 'db1'
+    - username: 'db_usr2'
+      state: 'present'
+      login_user: 'root'
+      login_password: '{{ mysql_password }}'
+      host: 'localhost'
+      password: 'password'
+      db_name: 'db2'

@@ -1,0 +1,26 @@
+---
+- name: Virtualhosts user set to register
+  debug:
+    msg: "{{ item.value.user  }}"
+  register: vh_users
+  with_dict: "{{ virtualhosts }}"
+
+- name: debug2
+  debug:
+    msg: "{{ users }}"
+
+- name: list
+  set_fact:
+    dict_users:
+      "{{ vh_users.results | map(attribute='item.value.user') | list }}"
+- name: dict_users
+  debug:
+    msg: "{{ dict_users }}"
+
+- name: combine
+  set_fact:
+    users: "{{ users | combine( dict_users ) }}"
+
+- name: debug3
+  debug:
+    msg: "{{ users }}"

@@ -1,0 +1,13 @@
+---
+# tasks file for roles/mysql57
+# create user
+- name: create mysql user
+  mysql_user:
+    login_user: "{{ item.login_user }}"
+    login_password: "{{ item.login_password }}"
+    name: "{{ item.username }}"
+    host: "{{ item.host }}"
+    password: "{{ item.password }}"
+    priv: "{{ item.db_name }}.*:ALL,GRANT"
+    state: "{{ item.state }}"
+  with_items: "{{ mysql8.user }}"

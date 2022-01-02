@@ -1,0 +1,184 @@
+---
+# defaults file for roles/httpd
+# Required vars
+virtualhosts:
+  lamp001:
+    user:
+      lamp001:
+        name: "lamp001"
+        state: "present"
+        group: "lamp001"
+        remove: "no"
+        create_home: 'yes'
+        password: "{{ lamp001_secret.lamp001_password }}"
+        shell: '/bin/bash'
+        comment: 'lamp user'
+        expires: '-1'
+        key: "{{ lamp001_secret.lamp001_key }}"
+        secret_key: "{{ lamp001_secret.lamp001_secret_key }}"
+        sudo: 'present'
+      lamp001_guest001:
+        name: "lamp001_guest001"
+        state: "present"
+        group: "lamp001_guest001"
+        remove: "no"
+        create_home: 'yes'
+        password: "{{ lamp001_secret.lamp001_guest001_password }}"
+        shell: '/bin/bash'
+        comment: 'lamp user'
+        expires: '-1'
+        key: "{{ lamp001_secret.lamp001_guest001_key }}"
+        secret_key: "{{ lamp001_secret.lamp001_guest001_secret_key }}"
+        sudo: 'present'
+      lamp001_guest002:
+        name: "lamp003_guest002"
+        state: "present"
+        group: "lamp003_guest002"
+        remove: "no"
+        create_home: 'yes'
+        password: "{{ lamp001_secret.lamp001_guest002_password }}"
+        shell: '/bin/bash'
+        comment: 'lamp user'
+        expires: '-1'
+        key: "{{ lamp001_secret.lamp001_guest002_key }}"
+        secret_key: "{{ lamp001_secret.lamp001_guest002_secret_key }}"
+        sudo: 'present'
+    httpd:
+      hostname: "lamp-001.develop.local"
+      host_dir: "/var/www/html/lamp001"
+      public_dir: "/public_html"
+      state: 'present'
+      owner: "lamp001"
+      group: "lamp001"
+      recurse: "yes"
+      log: "/var/log/httpd"
+      conf_options:
+        - AllowOverride All
+        - Options -Indexes +FollowSymLinks
+        - Options +ExecCGI
+        - AddHandler cgi-script .pl .cgi
+        - Order allow,deny
+        - Allow from all
+      conf_ssl_options:
+        - AllowOverride All
+        - Options -Indexes +FollowSymLinks
+        - Options +ExecCGI
+        - AddHandler cgi-script .pl .cgi
+        - Order allow,deny
+        - Allow from all
+      basic_auth:
+        lamp001:
+          state: 'present'
+          path: "/var/www/html/lamp001/.htpasswd"
+          name: 'lamp001'
+          password: "{{ lamp001_secret.lamp001_basic_auth_password }}"
+          owner: 'lamp001'
+          group: 'lamp001'
+          mode: '0644'
+          htaccess_path: "/var/www/html/lamp001/public_html/.htaccess"
+      ssl:
+        ssl_provider: 'general'
+        ssl_general:
+          - name: 'SSLCertificateFile'
+            src: '../common/certs/server.crt'
+            dest: '/etc/pki/tls/certs/lamp_001.crt'
+          - name: 'SSLCertificateKeyFile'
+            src: '../common/certs/server.key'
+            dest: '/etc/pki/tls/private/lamp_001.key'
+          #server_chain: '/etc/pki/tls/certs/ca-bundle.crt'
+        letsencrypt:
+          state: 'present'
+          email: "{{ lamp001_secret.lamp001_letsencrypt_email }}"
+    crontab:
+      letsencrypt001:
+        name: 'lamp-001.letsencrytp001'
+        state: 'present'
+        user: 'root'
+        job: /bin/bash -lc "certbot certonly --force-renew --webroot -w '/var/www/html/lamp001//public_html' -d 'lamp-001.develop.local' --post-hook 'systemctl reload httpd' > /dev/null 2>&1"
+        minute: "0"
+        hour: "12"
+        day: "1"
+        month: "*"
+        weekday: "*"
+      letsencrypt002:
+        name: 'lamp-001.letsencrytp002'
+        state: 'present'
+        user: 'root'
+        job: 'ls -la'
+        minute: "0"
+        hour: "12"
+        day: "1"
+        month: "*"
+        weekday: "*"
+    wordpress:
+      state: 'present'
+      db:
+        username: "lamp001_wordpress"
+        password: "{{ lamp001_secret.lamp001_db001_password }}"
+        user_state: "present"
+        host: "localhost"
+        db_name: "lamp001_wordpress"
+        db_state: "present"
+    mysql57:
+      lamp001_db001:
+        username: "lamp001_wp_db001"
+        password: "{{ lamp001_secret.lamp001_db001_password }}"
+        user_state: "present"
+        host: "localhost"
+        db_name: "lamp001_wp_db001"
+        db_state: "present"
+      lamp001_db002:
+        username: "lamp001_wp_db002"
+        password: "{{ lamp001_secret.lamp001_db002_password }}"
+        user_state: "present"
+        host: "localhost"
+        db_name: "lamp001_wp_db002"
+        db_state: "present"
+
+#httpd:
+#  virtualhosts:
+#    - hostname: "virtualexample1.com"
+#      ssl: true
+#      document_root: "/var/www/vhosts/virtualexample1.com"
+#      log: "/var/www/vhosts/virtualexample1.com/LOG"
+#      conf_options:
+#        - AllowOverride All
+#        - Options -Indexes +FollowSymLinks
+#        - Options +ExecCGI
+#        - AddHandler cgi-script .pl .cgi
+#        - Order allow,deny
+#        - Allow from all
+#      conf_ssl_options:
+#        - AllowOverride All
+#        - Options -Indexes +FollowSymLinks
+#        - Options +ExecCGI
+#        - AddHandler cgi-script .pl .cgi
+#        - Order allow,deny
+#        - Allow from all
+#      owner: "vh1"
+#      group: "vh1"
+#      recurse: "yes"
+#      server_crt: '/etc/pki/tls/certs/localhost.crt'
+#      server_key: '/etc/pki/tls/private/localhost.key'
+#      server_chain: '/etc/pki/tls/certs/ca-bundle.crt'
+#      letsencrypt:
+#        state: 'present'
+#        name: 'letsencrypt virtualexample1.com'
+#        email: 'admin@virtualhostexample1.com'
+#        cron:
+#          - name: "letsencrypt 001"
+#            state: "present"
+#            user: 'root'
+#            minute: "0"
+#            hour: "12"
+#            day: "1"
+#            month: "*"
+#            weekday: "*"
+#          - name: "letsencrypt 002"
+#            state: "present"
+#            user: 'root'
+#            minute: "0"
+#            hour: "13"
+#            day: "1"
+#            month: "*"
+#            weekday: "*"

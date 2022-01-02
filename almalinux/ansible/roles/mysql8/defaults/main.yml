@@ -1,0 +1,29 @@
+---
+# defaults file for roles/mysql57
+# Require vars
+mysql8:
+  mysql_root_password: 'root'
+  #databases:
+  #  - db_name: 'vh1'
+  #    login_user: 'root'
+  #    login_password: 'root'
+  #    state: 'present'
+  #  - db_name: 'vh2'
+  #    login_user: 'root'
+  #    login_password: 'root'
+  #    state: 'present'
+  #user:
+  #  - username: 'vh1'
+  #    state: 'present'
+  #    login_user: 'root'
+  #    login_password: 'root'
+  #    host: 'localhost'
+  #    password: 'password'
+  #    db_name: 'vh1'
+  #  - username: 'vh2'
+  #    state: 'present'
+  #    login_user: 'root'
+  #    login_password: 'root'
+  #    host: 'localhost'
+  #    password: 'password'
+  #    db_name: 'vh2'

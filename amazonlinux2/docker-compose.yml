@@ -1,0 +1,16 @@
+version: "3"
+services:
+  amazonlinux2_systemd:
+    build: ./Docker/systemd
+    container_name: AmazonLinux2_systemd
+    ports:
+      - "2222:22"
+    networks:
+      default:
+        ipv4_address: 172.30.0.3
+    privileged: true
+
+networks:
+  default:
+    external:
+      name: dev

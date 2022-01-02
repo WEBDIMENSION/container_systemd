@@ -1,0 +1,54 @@
+version: "3"
+services:
+  almalinux8_base:
+    build: ./docker/base
+    container_name: AlmaLinux_base
+    working_dir: /root
+    ports:
+      - "2224:22"
+    privileged: true
+    volumes:
+      - ./ansible:/root
+    hostname: AlmaLinux_base
+    networks:
+      default:
+        ipv4_address: 172.30.0.4
+
+  almalinux8_systemd:
+    build: ./docker/systemd
+    container_name: AlmaLinux_systemd
+    working_dir: /root/ansible
+    ports:
+      - "2225:22"
+      - "8080:80"
+      - "9090:9090"
+    privileged: true
+    volumes:
+      - ./ansible:/root/ansible
+    hostname: AlmaLinux_systemd
+    networks:
+      default:
+        ipv4_address: 172.30.0.5
+
+  almalinux8_lamp:
+    build: ./docker/lamp
+    container_name: AlmaLinux_lamp
+    working_dir: /root/ansible
+    ports:
+      - "2226:22"
+      - "8081:80"
+      - "9091:9090"
+      - "10000:10000"
+    privileged: true
+    volumes:
+      - ./ansible:/root/ansible
+    hostname: AlmaLinux_lamp
+    networks:
+      default:
+        ipv4_address: 172.30.0.6
+
+networks:
+  default:
+    external:
+      name: dev
+

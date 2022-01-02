@@ -1,0 +1,10 @@
+---
+# vars file for roles/httpd
+httpd_dependencies:
+  - httpd
+  - httpd-devel
+httpd_document_root: '/var/www'
+httpd_public_dir: '/html'
+webuser:
+  name: 'master'
+httpd_domain: 'almalinux.docker'

@@ -1,0 +1,27 @@
+version: "3"
+services:
+  centos7_base:
+    build: ./Docker/base
+    container_name: CentOS7_base
+    ports:
+      - "2222:22"
+    privileged: true
+    networks:
+      default:
+        ipv4_address: 172.30.0.2
+    command: /sbin/init
+  centos7_systemd:
+    build: ./Docker/systemd
+    container_name: CentOS7_systemd
+    ports:
+      - "2223:22"
+    privileged: true
+    networks:
+      default:
+        ipv4_address: 172.30.0.3
+    command: /sbin/init
+
+networks:
+  default:
+    external:
+      name: dev

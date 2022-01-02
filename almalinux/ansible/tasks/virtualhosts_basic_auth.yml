@@ -1,0 +1,27 @@
+---
+- name: Virtualhosts user set to register
+  debug:
+    msg: "{{ item.value.httpd  }}"
+  register: vh_basic_auth
+  with_dict: "{{ virtualhosts }}"
+
+- name: debug2
+  debug:
+    msg: "{{ vh_basic_auth }}"
+
+- name: list
+  set_fact:
+    dict_basic_authes:
+      "{{ vh_basic_auth.results | map(attribute='item.value.httpd.basic_auth') | list }}"
+
+- name: dict_basic_authes
+  debug:
+    msg: "{{ dict_basic_authes }}"
+
+- name: combine
+  set_fact:
+    basic_auth: "{{ basic_auth | combine( dict_basic_authes ) }}"
+
+- name: debug3
+  debug:
+    msg: "{{ basic_auth }}"

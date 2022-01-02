@@ -1,0 +1,70 @@
+---
+- name: check installed php
+  command: bash -lc "php --version"
+  register: php_exists
+  changed_when: False
+  ignore_errors: yes
+
+- name: Install php prepare
+  become: true
+  shell: |
+    dnf -y module reset php
+    dnf -y module enable php:7.4
+  when: php_exists is failed
+
+- name: Install php dependencies
+  become: true
+  dnf:
+    name: "{{ item }}"
+  with_items: "{{ php_dependencies }}"
+  when: php_exists is failed
+
+- name: Edit php-fpm config owner
+  become: true
+  replace:
+    path: '/etc/php-fpm.d/www.conf'
+    regexp: ';listen.owner = nobody'
+    replace: 'listen.owner = apache'
+  when: php_exists is failed
+
+- name: Edit php-fpm config group
+  become: true
+  replace:
+    path: '/etc/php-fpm.d/www.conf'
+    regexp: ';listen.group = nobody'
+    replace: 'listen.group = apache'
+  when: php_exists is failed
+
+- name: Edit php-fpm config group
+  become: true
+  replace:
+    path: '/etc/php-fpm.d/www.conf'
+    regexp: 'listen.acl_users = apache,nginx'
+    replace: ';listen.acl_users = apache,nginx'
+  when: php_exists is failed
+
+- name: Start php-fpm
+  become: true
+  systemd:
+    state: started
+    name: php-fpm
+    enabled: yes
+
+- name: Configure PHP
+  become: true
+  ini_file:
+    path: /etc/php.ini
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    backup: "{{ item.backup }}"
+  with_items:
+    - { section: PHP, option: post_max_size, value: "{{ php.filesize }}", backup: true }
+    - { section: PHP, option: upload_max_filesize, value: "{{ php.filesize }}", backup: false }
+    - { section: Date, option: date.timezone, value: "{{ php.timezone }}", backup: false }
+    - { section: mbstring, option: mbstring.language, value: "{{ php.language }}", backup: false }
+    - { section: mbstring, option: mbstring.internal_encoding, value: "{{ php.internal_encoding }}", backup: false }
+    - { section: mbstring, option: mbstring.encoding_translation, value: "{{ php.encoding_translation }}", backup: false }
+    - { section: mbstring, option: mbstring.detect_order, value: "{{ php.detect_order }}", backup: false }
+  notify:
+    - httpd_restart

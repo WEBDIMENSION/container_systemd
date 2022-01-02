@@ -1,0 +1,33 @@
+---
+# tasks file for roles/mysql8
+- name: copy .my.cnf file with root password credentials
+  template: src=templates/my.cnf.j2 dest=/root/.my.cnf
+
+# Install
+- name: check installed MySQL
+  command: bash -lc "mysql --version"
+  register: mysql_exists
+  changed_when: False
+  ignore_errors: yes
+
+- name: install mysql
+  become: true
+  shell: |
+    dnf -y install mysql
+    dnf -y install mysql-server
+    dnf -y install python3-PyMySQL
+  when:
+    - mysql_exists is failed
+
+- name: running and enabled mysqld
+  become: true
+  service:
+    name: mysqld
+    state: started
+    enabled: yes
+  when:
+    - mysql_exists is failed
+
+- include: change_password.yml
+- include: create_db.yml
+- include: create_user.yml

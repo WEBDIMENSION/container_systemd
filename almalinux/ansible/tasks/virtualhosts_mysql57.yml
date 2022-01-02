@@ -1,0 +1,27 @@
+---
+- name: Virtualhosts mysql57 set to register
+  debug:
+    msg: "{{ item.value.mysql57  }}"
+  register: vh_mysql57
+  with_dict: "{{ virtualhosts }}"
+
+- name: debug3
+  debug:
+    msg: "{{ vh_mysql57 }}"
+
+- name: list
+  set_fact:
+    dict_mysql57:
+      "{{ vh_mysql57.results | map(attribute='item.value.mysql57') | list }}"
+
+- name: dict_mysql57
+  debug:
+    msg: "{{ dict_mysql57 }}"
+
+- name: combine
+  set_fact:
+    mysql57_databases: "{{ mysql57.databases | combine( dict_mysql57 ) }}"
+
+- name: debug3
+  debug:
+    msg: "{{ mysql57_databases }}"

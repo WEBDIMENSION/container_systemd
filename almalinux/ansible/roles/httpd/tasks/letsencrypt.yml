@@ -1,0 +1,78 @@
+---
+# tasks file for roles/httpd
+# letsncryp
+
+- name: Check privkey.pem exists
+  become: true
+  stat:
+    path: "/etc/letsencrypt/live/{{ httpd_domain }}/privkey.pem"
+  register: key_exists
+
+- name: Get certs
+  become: true
+  shell: >
+    certbot certonly -m "{{ letsencrypt_email }}"
+    --agree-tos
+    --non-interactive $*
+    --webroot
+    -w "{{ httpd_document_root }}"
+    -d "{{ httpd_domain }}"
+  when:
+    - key_exists.stat.exists is false
+
+- name: httpd ssl | Set crt
+  become: true
+  lineinfile:
+    dest: /etc/httpd/conf.d/ssl.conf
+    regexp: "^SSLCertificateFile *"
+    insertafter: "#SSLCertificateFile *"
+    line:         "SSLCertificateFile /etc/letsencrypt/live/{{ httpd_domain }}/cert.pem"
+  notify:
+    - Restart httpd
+
+- name: httpd ssl | Set key
+  become: true
+  lineinfile:
+    dest: /etc/httpd/conf.d/ssl.conf
+    regexp:      "^SSLCertificateKeyFile *"
+    insertafter: "#SSLCertificateKeyFile *"
+    line:         "SSLCertificateKeyFile /etc/letsencrypt/live/{{ httpd_domain }}/privkey.pem"
+  notify:
+    - Restart httpd
+
+- name: httpd ssl | Set chain
+  become: true
+  lineinfile:
+    dest: /etc/httpd/conf.d/ssl.conf
+    regexp:      "SSLCertificateChainFile *"
+    insertafter: "#SSLCertificateChainFile *"
+    line:         "SSLCertificateChainFile /etc/letsencrypt/live/{{ httpd_domain }}/chain.pem"
+  notify:
+    - Restart httpd
+
+
+
+
+#- name: Remove VirtualHost(https)
+#  become: true
+#  file:
+#    path: "/etc/httpd/conf.d/letsencrypt_{{ item.value.httpd.hostname }}.conf"
+#    state: absent
+#  when:
+#    - item.value.httpd.ssl.ssl_provider != 'letsencrypt'
+#  with_dict:
+#    - "{{ virtualhosts }}"
+#  notify:
+#    - Restart httpd
+#
+#- name: Remove keys
+#  become: true
+#  include: letsencrypt_delete_loop.yml
+#  when:
+#    - item.value.httpd.ssl.ssl_provider != 'letsencrypt'
+#  with_dict:
+#    - "{{ virtualhosts }}"
+#  notify:
+#    - Restart httpd
+#
+#- include: letsencrypt_cron.yml

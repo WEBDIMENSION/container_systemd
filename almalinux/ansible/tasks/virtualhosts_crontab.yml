@@ -1,0 +1,26 @@
+---
+- name: Virtualhosts crontab set to register
+  debug:
+    msg: "{{ item.value.crontab  }}"
+  register: vh_crontab
+  with_dict: "{{ virtualhosts }}"
+
+- name: debug2
+  debug:
+    msg: "{{ crontab }}"
+
+- name: list
+  set_fact:
+    dict_crontab:
+      "{{ vh_crontab.results | map(attribute='item.value.crontab') | list }}"
+- name: dict_crontab
+  debug:
+    msg: "{{ dict_crontab }}"
+
+- name: combine
+  set_fact:
+    crontab: "{{ crontab | combine( dict_crontab ) }}"
+
+- name: debug3
+  debug:
+    msg: "{{ crontab }}"

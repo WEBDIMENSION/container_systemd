@@ -1,0 +1,10 @@
+---
+# tasks file for roles/httpd
+
+- include: install.yml
+
+#- include: ssl.yml
+#  when: letsencrypt is false
+#
+#- include: letsencrypt.yml
+#  when: letsencrypt is true

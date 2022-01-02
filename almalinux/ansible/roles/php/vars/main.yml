@@ -1,0 +1,35 @@
+---
+# vars file for roles/php
+php:
+  versions:
+    #php71: 'remi-php71'
+    #php72: 'remi-php72'
+    #php73: 'remi-php73'
+    php71: '7.1'
+    php72: '7.2'
+    php73: '7.3'
+    php74: '7.4'
+  language: 'Japanese'
+  internal_encoding: 'UTF-8'
+  encoding_translation: 'Off'
+  detect_order: 'auto'
+  filesize: '128M'
+  timezone: 'Asia/Tokyo'
+
+php_version: "{{ php.versions.php74 }}"
+
+php_dependencies:
+  - php
+  - php-common
+  - php-opcache
+  - php-cli
+  - php-curl
+  - php-mysqlnd
+  - php-mbstring
+  - php-xml
+  - php-xmlrpc
+  - php-gd
+  - php-pdo
+
+remi_url: 'http://rpms.famillecollet.com/enterprise/remi-release-7.rpm'
+

@@ -1,0 +1,17 @@
+---
+# tasks file for roles/cockpit
+- name: install cockpit
+  become: true
+  dnf:
+    name: "{{ item }}"
+    state: installed
+  with_items:
+    - cockpit
+
+- name: running and enabled cockpit
+  become: true
+  service:
+    name: cockpit.socket
+    state: started
+    enabled: yes
+

@@ -1,0 +1,26 @@
+---
+- name: almalinux-docker
+  hosts: almalinux8
+  vars:
+  vars_files:
+  roles:
+    - role: hostname
+      tags:
+        - hostname
+    - role: httpd
+      tags:
+        - httpd
+    - role: php
+      tags:
+        - php
+    - role: mysql8
+      tags:
+        - mysql8
+    - role: webmin
+      tags:
+        - webmin
+    - role: cockpit
+      tags:
+        - cockpit
+
+
