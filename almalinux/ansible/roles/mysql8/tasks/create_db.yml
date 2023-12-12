@@ -15,3 +15,28 @@
     - mysql_create_db
 
 
+- name: copy sql
+  become: true
+  template:
+    src: "templates/{{ item.sql_file }}"
+    dest: "{{ sql_dir }}/{{ item.sql_file }}"
+    owner: "{{ webuser.name }}"
+    group: "{{ webuser.name }}"
+    mode: '0644'
+  when:
+    - item.sql_file is defined
+  with_items:
+    - "{{ mysql8.databases }}"
+
+  tags:
+    - mysql_insert
+
+- name: Import DB
+  become: true
+  shell: "mysql -u{{ item.login_user }} -p{{ item.login_password }} -D {{ item.db_name }} < {{ sql_dir }}/{{ item.sql_file }}"
+  when:
+    - item.sql_file is defined
+  with_items:
+    - "{{ mysql8.databases }}"
+  tags:
+    - mysql_insert
